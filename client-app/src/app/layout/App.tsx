@@ -1,11 +1,12 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import axios from 'axios';
 import { Container } from 'semantic-ui-react'
 import { Activity } from '../models/activity';
 import NavBar from './NavBar';
 import './styles.css'
 import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard';
 import {v4 as uuid} from 'uuid'
+import agent from '../api/agent';
+import LoadingComponent from './LoadingComponents';
 
 function App() {
   // since we have added our typesctipt obj we can add the generic in use state
@@ -13,10 +14,16 @@ function App() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<Activity | undefined >(undefined);// | union of type
   const [editMode, setEditMode] = useState(false);// autoinference of type
-
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] =useState(false);
   useEffect(() => {
-    axios.get<Activity[]>('http://localhost:5000/api/activities').then( response => {
-    setActivities(response.data);
+    agent.Activities.list().then( response => {
+      response = response.map(activity => {
+        activity.date = activity.date.split('T')[0];
+        return activity;
+      });
+      setActivities(response);
+      setLoading(false);
     })
   }, [])// we have added the dependecies list because otherwise is going to run constantly
   // every time something is changing in the component there is going to be a re render
@@ -39,17 +46,34 @@ function App() {
   // when we create oo modify an activity we call this function, we have decided to stre it here 
   // because it's also where we have the list of activities
   function handleCreateOrEditActivity(activity: Activity) {
-    // the activities is an array we need to replace just one activity
-    activity.id 
-      ? setActivities([...activities.filter(x => x.id !== activity.id), activity])
-      : setActivities([...activities, {...activity, id: uuid() }]);
-    setEditMode(false);
-    setSelectedActivity(activity);
+    setSubmitting(true);
+    if(activity.id)
+      agent.Activities.update(activity).then(() =>{   // update db
+        setActivities([...activities.filter(x => x.id !== activity.id), activity]); //update gui
+        setSubmitting(false);    
+        setEditMode(false);
+        setSelectedActivity(activity);
+      });
+    else{
+      activity.id = uuid();
+      agent.Activities.create(activity).then(() =>{
+        setActivities([...activities, activity]);
+        setSubmitting(false);    
+        setEditMode(false);
+        setSelectedActivity(activity);
+      });
+    }
+    
+    
   }
   function handleDeleteActivity(id: string){
-    setActivities([...activities.filter(x => x.id !== id)])
+    setSubmitting(true);
+    agent.Activities.delete(id).then(() => {
+      setActivities([...activities.filter(x => x.id !== id)]);
+      setSubmitting(false);
+    })
   }
-
+  if (loading)  return <LoadingComponent />
   return (
     <>
       <NavBar openForm = {handleFormOpen}/>
@@ -64,6 +88,7 @@ function App() {
           closeForm = {handleFormClose}
           createOrEdit={handleCreateOrEditActivity}
           deleteActivity={handleDeleteActivity}
+          submitting={submitting}
         />
       </Container>
     </>
