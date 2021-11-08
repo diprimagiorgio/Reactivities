@@ -13,8 +13,8 @@ namespace API.Controllers
 {
     public class ActivitiesController : baseApiController{  
         [HttpGet]
-        public async Task<ActionResult<List<Activity>>> GetActivities(CancellationToken ct){
-            return await Mediator.Send(new List.Query(),ct);
+        public async Task<ActionResult<List<Activity>>> GetActivities(){
+            return await Mediator.Send(new List.Query());
         }
         [HttpGet("{id}")]//in this way we are going to recive also the id from the url
         public async Task<ActionResult<Activity>> GetActivity(Guid id){
