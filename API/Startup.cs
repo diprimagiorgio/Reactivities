@@ -17,6 +17,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Persistence;
 using API.Extentions;
+using FluentValidation.AspNetCore;
+using API.Middleware;
+
 namespace API
 {
     public class Startup
@@ -34,14 +37,18 @@ namespace API
 
             services.AddControllers();
             services.AddApplicationServices(_config);
+            services.AddControllers().AddFluentValidation(config =>{
+                config.RegisterValidatorsFromAssemblyContaining<Create>();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseMiddleware<ExceptionMiddleware>();
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                // orders metter and first is going to call be called first
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
             }
