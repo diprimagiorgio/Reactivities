@@ -19,6 +19,8 @@ using Persistence;
 using API.Extentions;
 using FluentValidation.AspNetCore;
 using API.Middleware;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace API
 {
@@ -34,12 +36,16 @@ namespace API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-            services.AddControllers();
-            services.AddApplicationServices(_config);
-            services.AddControllers().AddFluentValidation(config =>{
+            services.AddControllers(opt => {
+                // we ensure that every endpoint require authorization
+                var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                opt.Filters.Add(new AuthorizeFilter(policy));
+            })
+            .AddFluentValidation(config =>{
                 config.RegisterValidatorsFromAssemblyContaining<Create>();
             });
+            services.AddApplicationServices(_config);
+            services.AddIndentityServices(_config);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,6 +64,7 @@ namespace API
             app.UseRouting();
             app.UseCors("CorsPolicy");// here the order is important
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
