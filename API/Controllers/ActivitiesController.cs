@@ -13,7 +13,8 @@ using Persistence;
 
 namespace API.Controllers
 {
-    public class ActivitiesController : baseApiController{  
+    [AllowAnonymous]
+        public class ActivitiesController : baseApiController{  
         [HttpGet]
         public async Task<IActionResult> GetActivities(){
             return HandleResult(await Mediator.Send(new List.Query()));

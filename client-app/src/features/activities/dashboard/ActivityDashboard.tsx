@@ -24,7 +24,7 @@ export default observer(function ActivityDashboard(){
     // because it's also where we have the list of activities
 
 
-    if (loadingInitial)  return <LoadingComponent />
+    if (loadingInitial)  return <LoadingComponent content='Loading activities...' />
     return(
         <Grid>
             <Grid.Column width='10'>
