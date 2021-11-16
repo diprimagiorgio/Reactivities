@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { Button, Header, Segment } from "semantic-ui-react";
 import LoadingComponent from "../../../app/layout/LoadingComponents";
@@ -13,22 +13,14 @@ import MyTextArea from "../../../app/common/form/MyTextArea";
 import MySelectInput from "../../../app/common/form/MySelectinput";
 import { categoryOptions } from "../../../app/common/options/categoryOptions";
 import MyDateInput from "../../../app/common/form/MyDateInput";
-import { Activity } from "../../../app/models/activity";
+import { ActivityFormValues } from "../../../app/models/activity";
 
 export default observer(function ActivityForm() {
     const {activityStore} = useStore();
     const history = useHistory();
-    const { updateActivity, createActivity, loading, loadActivity, loadingInitial} = activityStore;
+    const { updateActivity, createActivity, loadActivity, loadingInitial} = activityStore;
     const {id} = useParams<{id : string}>();
-    const [activity, setActivity] = useState<Activity>({
-        id: '',
-        title: '',
-        category: '',
-        description: '',
-        date: null,
-        city: '',
-        venue: ''
-    });
+    const [activity, setActivity] = useState<ActivityFormValues>(new ActivityFormValues());
     const validationSchema = Yup.object({
         title: Yup.string().required('the activity title is required'),
         description: Yup.string().required('the activity description is required'),
@@ -38,11 +30,11 @@ export default observer(function ActivityForm() {
         venue: Yup.string().required()
     })
     useEffect(() =>{
-        if(id) loadActivity(id).then(activity => setActivity(activity!))
+        if(id) loadActivity(id).then(activity => setActivity(new ActivityFormValues(activity!)))
     }, [id, loadActivity]);
 
-    function handleFormSubmit(activity: Activity){
-        if (activity.id.length === 0) {
+    function handleFormSubmit(activity: ActivityFormValues){
+        if (!activity.id) {
             let newActivity = {
                 ...activity,
                 id: uuid()
@@ -80,7 +72,7 @@ export default observer(function ActivityForm() {
                 <MyTextInput placeholder='Venue' name='venue'/>
                 <Button 
                     disabled={isSubmitting || !dirty || !isValid }
-                    loading={loading} floated='right' positive type='submit' content='Submit'/>
+                    loading={isSubmitting} floated='right' positive type='submit' content='Submit'/>
                 <Button as={Link} to="/activities" floated='right' type='button' content='Cancel'/>
             </Form>
             )}
