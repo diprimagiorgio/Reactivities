@@ -13,7 +13,6 @@ using Persistence;
 
 namespace API.Controllers
 {
-    [AllowAnonymous]
         public class ActivitiesController : baseApiController{  
         [HttpGet]
         public async Task<IActionResult> GetActivities(){
@@ -32,14 +31,21 @@ namespace API.Controllers
             );
         }
         // here we are going to get the id from the url and the activity from the body
+        [Authorize(Policy = "IsActivityHost")]
         [HttpPut("{id}")]
         public async Task<IActionResult> EditActivity(Guid id, Activity activity){
             activity.Id = id;
             return HandleResult( await Mediator.Send(new Edit.Command{Activity = activity}));
         }
+        [Authorize(Policy = "IsActivityHost")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> RemoveActivity(Guid id){
             return HandleResult(await Mediator.Send(new Delete.Command{Id = id}));
+        }
+        [HttpPost("{id}/attend")]
+        public async Task<IActionResult> Attend(Guid id){
+            return HandleResult(await Mediator.Send(new UpdateAttendance.Command{Id = id}));
+            
         }
 
     }

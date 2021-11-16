@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Activities.Interfaces;
 using Application.Core;
 using Domain;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 namespace Application.Activities
@@ -15,7 +17,7 @@ namespace Application.Activities
     {
         public class Command : IRequest<Result<Unit>>{
             public Activity Activity {get; set;}
-        }
+        } 
 
 
         public class Commandvalidator : AbstractValidator<Command>
@@ -29,14 +31,26 @@ namespace Application.Activities
         public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
+            private readonly IUserAccessor _userAccessor;
 
-            public Handler(DataContext context)
+            public Handler(DataContext context, IUserAccessor userAccessor)
             {
+                this._userAccessor = userAccessor;
                 this._context = context;
             }
 
             public async Task< Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
+                var user = await _context.Users.FirstOrDefaultAsync(x => x.UserName == _userAccessor.GetUsername());
+
+                var attendee = new ActivityAttendee{
+                    Activity = request.Activity,
+                    AppUser = user,
+                    IsHost = true
+                };
+
+                request.Activity.Attendees.Add(attendee); 
+
                 // here we add our activity inside our context in memory, but we need to save in db
                 _context.Activities.Add(request.Activity);
 

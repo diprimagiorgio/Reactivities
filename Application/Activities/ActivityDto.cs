@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Application.Profiles;
 
-namespace Domain
+namespace Application.Activities
 {
-    public class Activity
+    public class ActivityDto
     {
-        //GuID rapresent unique identifier, because of name is going to be recognize ad primary key
         public Guid Id { get; set; }
         public string Title { get; set; }
         public DateTime Date { get; set; }
@@ -15,7 +13,8 @@ namespace Domain
         public string Category { get; set; }
         public string City { get; set; }
         public string Venue { get; set; }
-        public ICollection<ActivityAttendee> Attendees { get; set; } = new List<ActivityAttendee>();
-        public bool IsCancelled { get; set; } 
+        public string HostUsername { get; set; }
+        public bool IsCancelled { get; set; }
+        public ICollection<Profile> Attendees { get; set; }
     }
-}
+} 
