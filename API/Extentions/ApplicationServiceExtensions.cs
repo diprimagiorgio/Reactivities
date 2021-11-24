@@ -13,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Persistence;
 using Infrastructure.Photos;
-using Application.Interfaces;
 using Application.Photos;
 
 namespace API.Extentions
