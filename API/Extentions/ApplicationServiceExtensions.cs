@@ -25,6 +25,7 @@ namespace API.Extentions
             );
             services.AddDbContext<DataContext>(options =>
             
+            
             // to get connection string from heroku, because i's not static
             {
                 var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
