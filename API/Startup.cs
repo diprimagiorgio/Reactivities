@@ -53,11 +53,29 @@ namespace API
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseMiddleware<ExceptionMiddleware>();
+
+            app.UseXContentTypeOptions();
+            app.UseReferrerPolicy(opt => opt.NoReferrer());
+            app.UseXXssProtection(opt => opt.EnabledWithBlockMode());
+            app.UseXfo(opt => opt.Deny());
+            // most important, I cas start with report only to check
+            app.UseCsp(opt => opt
+                .BlockAllMixedContent()// no http and https. Just https
+                .StyleSources(s => s.Self().CustomSources("https://fonts.googleapis.com/"))// from where css came from, we are ok just from our domain
+                .FontSources(s => s.Self().CustomSources("https://fonts.gstatic.com/", "data:"))
+                .FormActions(s => s.Self())
+                .FrameAncestors(s => s.Self())
+                .ScriptSources(s => s.Self().CustomSources("sha256-kXwZFeDqzQYQxMANlJcsdedkJvek1q5ncjzFrCq4x+I="))// for js 
+                .ImageSources(s => s.Self().CustomSources("https://res.cloudinary.com/"))
+                
+            );
             if (env.IsDevelopment())
             {
                 // orders metter and first is going to call be called first
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
+            }else{
+                app.UseHsts();
             }
 
             //app.UseHttpsRedirection();
