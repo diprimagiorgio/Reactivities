@@ -1,14 +1,25 @@
 import { observer } from "mobx-react-lite";
-import React, { useEffect } from "react";
-import { Grid } from "semantic-ui-react";
+import React, { useEffect, useState } from "react";
+import InfiniteScroll from "react-infinite-scroller";
+import { Grid, Loader } from "semantic-ui-react";
 import LoadingComponent from "../../../app/layout/LoadingComponents";
+import { PagingParams } from "../../../app/models/pagination";
 import { useStore } from "../../../app/stores/store";
 import ActivityFilters from "./ActivityFilter";
 import ActivityList from "./ActivityList";
+import ActivityListItemPlaceholder from "./ActivityListItemPlaceholder";
 
 export default observer(function ActivityDashboard(){
     const {activityStore} = useStore(); // we destructure thr object to take just the part we are interested in
-    const {loadActivities, activityRegistry, loadingInitial} = activityStore;
+    const {loadActivities, activityRegistry, loadingInitial, setPagingParams, pagination} = activityStore;
+    const [loadingNext, setLoadingNext] = useState(false);
+
+    function handleGetNext(){
+        setLoadingNext(true);
+        setPagingParams(new PagingParams(pagination!.currentPage + 1 ));
+        loadActivities()
+        .then(() => setLoadingNext(false));
+    }
 
 
     // since we have added our typesctipt obj we can add the generic in use state
@@ -24,14 +35,29 @@ export default observer(function ActivityDashboard(){
     // because it's also where we have the list of activities
 
 
-    if (loadingInitial)  return <LoadingComponent content='Loading activities...' />
     return(
         <Grid>
             <Grid.Column width='10'>
+            { loadingInitial && !loadingNext ?
+            <>
+                <ActivityListItemPlaceholder />
+                <ActivityListItemPlaceholder />
+            </>
+            : 
+            <InfiniteScroll
+                pageStart={0}
+                loadMore={handleGetNext}
+                hasMore={!loadingNext && !!pagination && pagination.currentPage < pagination.totalPages}
+                initialLoad={false}
+            >
                 <ActivityList />
+            </InfiniteScroll>}
             </Grid.Column>
             <Grid.Column width='6'>
                 <ActivityFilters/>                
+            </Grid.Column>
+            <Grid.Column width={10}>
+                <Loader active={loadingNext} />
             </Grid.Column>
         </Grid>
     )

@@ -15,8 +15,8 @@ namespace API.Controllers
 {
         public class ActivitiesController : baseApiController{  
         [HttpGet]
-        public async Task<IActionResult> GetActivities(){
-            return HandleResult(await Mediator.Send(new List.Query()));
+        public async Task<IActionResult> GetActivities([FromQuery] ActivityParams param){
+            return HandlePagedResult(await Mediator.Send(new List.Query{Params = param}));
         }
         [HttpGet("{id}")]//in this way we are going to recive also the id from the url
         public async Task<IActionResult> GetActivity(Guid id){
