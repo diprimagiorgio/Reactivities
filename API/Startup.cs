@@ -63,6 +63,13 @@ namespace API
             //app.UseHttpsRedirection();
 
             app.UseRouting();
+            // here we have to add support to static file
+
+            app.UseDefaultFiles();// going to check in wwwroot folder and index file
+            app.UseStaticFiles();
+
+
+
             app.UseCors("CorsPolicy");// here the order is important
 
             app.UseAuthentication();
@@ -72,6 +79,7 @@ namespace API
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<ChatHub>("/chat");
+                 endpoints.MapFallbackToController("Index", "Fallback");
             });
         }
     }
