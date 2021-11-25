@@ -6,7 +6,7 @@ using Infrastructure.Security;
 
 namespace API.Extentions
 {
-    public static class IdentityServiceExtentions
+    public static class IdentityServiceExtensions
     {
         public static IServiceCollection AddIndentityServices(this IServiceCollection services, IConfiguration config){
             services.AddIdentityCore<AppUser>(opt => {
