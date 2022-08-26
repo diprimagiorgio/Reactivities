@@ -28,7 +28,7 @@ namespace Application.Activities
 
             public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor  )
             {
-            this._userAccessor = userAccessor;
+                this._userAccessor = userAccessor;
                 this._context = context;
                 this._mapper = mapper;
 

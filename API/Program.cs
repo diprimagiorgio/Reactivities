@@ -1,17 +1,17 @@
 using Application.Activities;
+using static Application.Activities.Create;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // add services to the container
 
-builder.Services.AddControllers(opt => {
+builder.Services.AddMvc(opt => {
     // we ensure that every endpoint require authorization
     var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
     opt.Filters.Add(new AuthorizeFilter(policy));
 })
-.AddFluentValidation(config =>{
-    config.RegisterValidatorsFromAssemblyContaining<Create>();
-});
+.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Create>());
+
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIndentityServices(builder.Configuration);
 
